@@ -4,11 +4,13 @@ import beans.GroupedItems
 import com.google.gson.GsonBuilder
 import config.ERROR_DIR
 import config.INPUT_PATH
-import config.LLM_CALL_DELAY
 import config.OUTPUT_DIR
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import utils.*
 import java.io.File
 
@@ -25,9 +27,8 @@ fun main(): Unit = runBlocking {
 
     val parser: ICleanDataParser = CleanDataParser()
     val chucking: IDataChucking = DataChucking()
-    val extractors = createExtractors(Api.Deepseek)
+    val extractor = createExtractor(Api.Zuke("gemini-2.0-flash"))
 
-    logI("根据密钥数量实例 ${extractors.size} 化个提取器")
     logD("变量初始化完成")
 
     try {
@@ -43,21 +44,22 @@ fun main(): Unit = runBlocking {
 
         // 遍历每个分组
         groupedItemsList.forEachIndexed { index, groupedItems ->
-            if (index != 0) {
-                logD("休眠 ${LLM_CALL_DELAY / 1000} 秒, 适应服务器限速")
-                delay(LLM_CALL_DELAY)
-            }
+//            if (index != 0) {
+//                logD("休眠 ${LLM_CALL_DELAY / 1000} 秒, 适应服务器限速")
+//                delay(LLM_CALL_DELAY)
+//            }
 
             // 分块处理
             val chunks = chucking.formatToChuckedStrings(2048L, groupedItems)
             logI("处理 '${groupedItems.filename}' 为 ${chunks.size} 个分块")
 
+            // 并发控制
+            val limitedDispatcher = Dispatchers.IO.limitedParallelism(extractor.keyCount)
+
             // 提取节点和边
-            val results = chunks.mapIndexed { index, chunk ->
-                async(Dispatchers.IO) {
+            val results = chunks.map { chunk ->
+                async(limitedDispatcher) {
                     try {
-                        // 轮询分配 extractor
-                        val extractor = extractors[index % extractors.size]
                         extractor.extract(chunk)
                     } catch (t: Throwable) {
                         logE("\"${chunk.take(6)}...\" 块记录为 error 文件")

@@ -1,5 +1,5 @@
 import beans.GroupedItems
-import config.DEEPSEEK_KEYs
+import config.DEEPSEEK_KEYS
 import config.INPUT_PATH
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
@@ -30,8 +30,8 @@ fun iDataChuckingExample() {
 }
 
 fun iLLMJsonExtractorExample() {
-    val extractor: ILLMJsonExtractor = object : JsonExtractor(
-        DEEPSEEK_KEYs[0],
+    val extractor: ILLMJsonExtractor = object : JsonExtractor4Openai(
+        DEEPSEEK_KEYS,
         "https://api.deepseek.com/",
         "deepseek-chat"
     ) {
