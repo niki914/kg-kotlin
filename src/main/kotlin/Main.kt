@@ -27,7 +27,7 @@ fun main(): Unit = runBlocking {
     val chucking: IDataChucking = DataChucking()
     val extractors = createExtractors(Api.Deepseek)
 
-    logI("实例 ${extractors.size} 化个 extractor")
+    logI("根据密钥数量实例 ${extractors.size} 化个提取器")
     logD("变量初始化完成")
 
     try {
@@ -42,7 +42,12 @@ fun main(): Unit = runBlocking {
 
 
         // 遍历每个分组
-        groupedItemsList.forEach { groupedItems ->
+        groupedItemsList.forEachIndexed { index, groupedItems ->
+            if (index != 0) {
+                logD("休眠 ${LLM_CALL_DELAY / 1000} 秒, 适应服务器限速")
+                delay(LLM_CALL_DELAY)
+            }
+
             // 分块处理
             val chunks = chucking.formatToChuckedStrings(2048L, groupedItems)
             logI("处理 '${groupedItems.filename}' 为 ${chunks.size} 个分块")
@@ -65,9 +70,6 @@ fun main(): Unit = runBlocking {
                     }
                 }
             }.awaitAll()
-
-            logD("休眠 ${LLM_CALL_DELAY / 1000} 秒, 适应服务器限速")
-            delay(LLM_CALL_DELAY)
 
             // 合并结果
             val mergedEdges = results.flatMap { it.edges }.distinct()
