@@ -1,12 +1,65 @@
+package utils
+
+import JsonExtractor
 import beans.Api
 import interfaces.ILLMJsonExtractor
+import java.awt.Desktop
+import java.io.File
+import java.util.*
 
 fun Throwable.toLogString(): String {
     return "message: ${message}\ncause: ${cause}\nstack trace: ${stackTraceToString()}"
 }
 
-fun Throwable.println() {
-    println("错误:\n${toLogString()}")
+fun Throwable.logE(tag: String = "") {
+    logE(toLogString(), tag)
+}
+
+fun openFolder(path: String): Boolean = try {
+    val folder = File(path)
+    if (!folder.exists() || !folder.isDirectory) {
+        false
+    } else {
+        Desktop.getDesktop().open(folder)
+        true
+    }
+} catch (_: Throwable) {
+    false
+}
+
+fun logV(
+    msg: String = "",
+    tag: String = ""
+) = Log.v(tag, msg)
+
+fun logD(
+    msg: String = "",
+    tag: String = ""
+) = Log.d(tag, msg)
+
+fun logI(
+    msg: String = "",
+    tag: String = ""
+) = Log.i(tag, msg)
+
+fun logW(
+    msg: String = "",
+    tag: String = ""
+) = Log.w(tag, msg)
+
+fun logE(
+    msg: String = "",
+    tag: String = "",
+    throwable: Throwable? = null
+) = Log.e(tag, msg, throwable)
+
+private val scanner = Scanner(System.`in`)
+
+fun pause(msg: String = "按任意键继续...") {
+    scanner.apply {
+        logE(msg, "暂停")
+        nextLine()
+    }
 }
 
 fun createExtractors(api: Api): List<ILLMJsonExtractor> {

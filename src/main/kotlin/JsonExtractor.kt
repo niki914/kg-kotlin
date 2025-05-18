@@ -17,7 +17,7 @@ abstract class JsonExtractor(
     private val client: OpenAIClient = OpenAIOkHttpClient.builder()
         .apiKey(apiKey)
         .baseUrl(baseUrl)
-        .timeout(Duration.ofSeconds(20))
+        .timeout(Duration.ofSeconds(60))
         .build()
     private val gson = Gson()
 

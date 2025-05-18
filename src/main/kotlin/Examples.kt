@@ -4,6 +4,7 @@ import config.INPUT_PATH
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
 import interfaces.ILLMJsonExtractor
+import utils.logE
 
 fun iCleanDataParserExample() {
     val parser: ICleanDataParser = CleanDataParser()
@@ -14,7 +15,7 @@ fun iCleanDataParserExample() {
         // 分组
         val groupedItemsList: List<GroupedItems> = parser.groupByName(items)
     } catch (e: Exception) {
-        e.println()
+        e.logE()
     }
 }
 

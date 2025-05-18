@@ -7,10 +7,19 @@ group = "org.example"
 version = "1.0-SNAPSHOT"
 
 dependencies {
+    // ansi 日志颜色
+    implementation("org.fusesource.jansi:jansi:2.4.0")
+
+    // json
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // llm
     implementation("com.openai:openai-java:1.6.1")
+
+    // kotlin 依赖
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+
     testImplementation(kotlin("test"))
 }
 
