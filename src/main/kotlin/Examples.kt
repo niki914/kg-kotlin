@@ -1,17 +1,16 @@
 import beans.GroupedItems
+import config.DEEPSEEK_KEYs
+import config.INPUT_PATH
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
 import interfaces.ILLMJsonExtractor
-
-const val inputPath = "C:\\Users\\NIKI\\Desktop\\clean\\1.json"
-const val outputDir = "C:\\Users\\NIKI\\Desktop\\clean\\output"
 
 fun iCleanDataParserExample() {
     val parser: ICleanDataParser = CleanDataParser()
 
     try {
         // 读取数据
-        val items = parser.readFromPath(inputPath)
+        val items = parser.readFromPath(INPUT_PATH)
         // 分组
         val groupedItemsList: List<GroupedItems> = parser.groupByName(items)
     } catch (e: Exception) {

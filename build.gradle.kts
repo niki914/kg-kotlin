@@ -18,6 +18,21 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "MainKt" // 确保主类正确，基于 Main.kt
+    }
+    archiveBaseName.set("kg-kotlin") // 设置 JAR 文件名
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    from(sourceSets.main.get().output)
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") }.map { zipTree(it) }
+    })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE // 添加此行，排除重复文件
+}
+
 kotlin {
     jvmToolchain(17)
 }
