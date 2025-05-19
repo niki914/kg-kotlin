@@ -12,8 +12,8 @@ object Log {
         val ansi = Ansi.ansi()
         val colored = when (level) {
             "ERROR" -> ansi.fgRed()
-            "DEBUG" -> ansi.fgBlue()
-            "INFO" -> ansi.fgGreen()
+            "DEBUG" -> ansi.fgGreen()
+            "INFO" -> ansi.fgBlue()
             "WARN" -> ansi.fgYellow()
             else -> ansi
         }

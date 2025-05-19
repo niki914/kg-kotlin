@@ -15,8 +15,7 @@ dependencies {
 
     // llm
     implementation("com.openai:openai-java:1.6.1")
-//    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
-    implementation("com.google.genai:google-genai:0.8.0")
+//    implementation("com.google.genai:google-genai:0.8.0")
 
     // kotlin 依赖
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")

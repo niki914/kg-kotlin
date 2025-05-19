@@ -2,96 +2,148 @@ import beans.Api
 import beans.ExtractedData
 import beans.GroupedItems
 import com.google.gson.GsonBuilder
-import config.ERROR_DIR
-import config.INPUT_PATH
-import config.OUTPUT_DIR
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import utils.*
-import java.io.File
 
+const val INPUT_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\1.json"
+private const val ERROR_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\error"
+private const val OUTPUT_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\output"
+private const val CONTEXT = "广东工业大学财务"
+private val API: Api = Api.Zuke("gemini-2.0-flash")
 
 /**
- * 实现清洗后的数据的必要部分获取、数据分块、简单的知识图谱获取和图谱文件导出
+ * 主函数: 实现清洗后数据的读取、分组、分块、知识图谱提取和结果导出
  */
 fun main(): Unit = runBlocking {
-    println("hello world")
+    logW("hello world")
 
     val gson by lazy {
         GsonBuilder().setPrettyPrinting().create()
     }
-
-    val parser: ICleanDataParser = CleanDataParser()
-    val chucking: IDataChucking = DataChucking()
-    val extractor = createExtractor(Api.Zuke("gemini-2.0-flash"))
-
-    logD("变量初始化完成")
+    // 创建 Main 实例, 负责协调数据处理流程
+    val main = Main()
 
     try {
-        // 确保输出目录存在
-        File(ERROR_DIR).mkdirs()
-        File(OUTPUT_DIR).mkdirs()
+        // 读取输入文件并按文件名分组
+        val groupedItemsList: List<GroupedItems> = main.readItemsFromFile()
 
-        // 读取并分组数据
-        val items = parser.readFromPath(INPUT_PATH)
-        logI("读取 item 数: ${items.size}")
-        val groupedItemsList: List<GroupedItems> = parser.groupByName(items)
+        // 遍历每个分组, 处理数据并生成知识图谱
+        groupedItemsList.forEach { groupedItems ->
+            // 处理分组数据, 提取节点和关系, 合并结果
+            val mergedResult = main.process(groupedItems)
 
+            // 将合并结果序列化为 JSON 并写入输出文件
+            writeStringToFile(OUTPUT_DIR, groupedItems.filename, gson.toJson(mergedResult))
 
-        // 遍历每个分组
-        groupedItemsList.forEachIndexed { index, groupedItems ->
-//            if (index != 0) {
-//                logD("休眠 ${LLM_CALL_DELAY / 1000} 秒, 适应服务器限速")
-//                delay(LLM_CALL_DELAY)
-//            }
-
-            // 分块处理
-            val chunks = chucking.formatToChuckedStrings(2048L, groupedItems)
-            logI("处理 '${groupedItems.filename}' 为 ${chunks.size} 个分块")
-
-            // 并发控制
-            val limitedDispatcher = Dispatchers.IO.limitedParallelism(extractor.keyCount)
-
-            // 提取节点和边
-            val results = chunks.map { chunk ->
-                async(limitedDispatcher) {
-                    try {
-                        extractor.extract(chunk)
-                    } catch (t: Throwable) {
-                        logE("\"${chunk.take(6)}...\" 块记录为 error 文件")
-                        t.logE()
-                        val outputFile = File(ERROR_DIR, "${chunk.hashCode()}.txt")
-                        outputFile.writeText(chunk)
-                        ExtractedData(emptyList(), emptyList()) // 返回空结果以继续处理
-                    }.also {
-                        logD("\"${chunk.take(6)}...\" 块处理完成")
-                    }
-                }
-            }.awaitAll()
-
-            // 合并结果
-            val mergedEdges = results.flatMap { it.edges }.distinct()
-            val mergedNodes = results.flatMap { it.nodes }.distinct()
-            val mergedResult = ExtractedData(mergedEdges, mergedNodes)
-
-            // 写入 JSON 文件
-            val outputFile = File(OUTPUT_DIR, groupedItems.filename)
-            outputFile.writeText(gson.toJson(mergedResult))
-
+            // 打印处理完成日志
             logD("${groupedItems.filename} 处理完成")
-            logI("已写入文件: ${outputFile.absolutePath}")
+            logI("已写入文件: ${groupedItems.filename}")
         }
 
+        // 打开输出目录, 方便查看结果
         logD("打开输出文件夹")
         openFolder(OUTPUT_DIR)
     } catch (e: Exception) {
+        // 捕获主流程异常, 打印错误日志
         logE("主函数运行出错")
         e.logE()
     }
 
+    // 暂停
     pause("已经完成, 按任意键继续")
+}
+
+/**
+ * Main 类: 协调数据读取、分块、提取和合并的逻辑
+ */
+class Main {
+    // 数据解析器, 负责从文件读取和分组清理后的数据
+    private val parser: ICleanDataParser = CleanDataParser()
+
+    // 数据分块器, 负责将分组数据切分为指定大小的块
+    private val chucking: IDataChucking = DataChucking()
+
+    // 数据处理器, 定义上下文和 API, 用于节点和关系提取
+    private val dataProcessor = object : DataProcessor() {
+        override val context: String = CONTEXT
+        override val api: Api = API
+    }
+
+    /**
+     * 处理单个分组数据: 分块、提取节点/关系、合并结果
+     * @return 合并后的知识图谱数据(节点、边、关系)
+     */
+    suspend fun process(groupedItems: GroupedItems, eachSize: Long = 2048L): ExtractedData {
+        // 将分组数据分块
+        val chunks = chunk(groupedItems, eachSize)
+
+        // 创建限制并发的 Dispatcher, 基于 dataProcessor 的 keyCounts
+        val limitedDispatcher = Dispatchers.IO.limitedParallelism(dataProcessor.keyCounts)
+
+        // 使用协程并发处理每个分块, 提取节点和关系
+        return withContext(limitedDispatcher) {
+            val results = chunks.map { chunk ->
+                async(limitedDispatcher) {
+                    processInternal(chunk)
+                }
+            }.awaitAll()
+            // 合并所有分块的提取结果
+            merge(results)
+        }
+    }
+
+    /**
+     * 处理单个分块: 提取节点和关系, 组装 ExtractedData
+     * @return 提取的知识图谱数据(节点、边、关系)
+     */
+    private fun processInternal(chunk: String): ExtractedData = try {
+        // 提取节点数据
+        val nodeData = dataProcessor.parseNodeData(chunk)
+        // 基于节点数据提取关系
+        val relationData = dataProcessor.parseRelationNodeData(nodeData, chunk)
+        // 组装节点和关系为 ExtractedData
+        dataProcessor.buildExtractedData(nodeData, relationData, chunk)
+    } catch (t: Throwable) {
+        // 捕获处理异常, 记录错误并保存分块到错误目录
+        logD("记录为错误", "[${chunk.take(6)}...]")
+        t.logE()
+        writeStringToFile(ERROR_DIR, "${chunk.hashCode()}.txt", chunk)
+        ExtractedData() // 返回空数据, 避免影响后续合并
+    }.also {
+        // 打印分块处理完成日志
+        logD("处理完成", "[${chunk.take(6)}...]")
+    }
+
+    /**
+     * 合并多个分块的提取结果
+     * @return 合并后的知识图谱数据
+     */
+    private fun merge(list: List<ExtractedData>): ExtractedData = dataProcessor.mergerExtractedData(list)
+
+    /**
+     * 读取输入文件并分组
+     * @return 分组后的数据列表, 按文件名组织
+     */
+    fun readItemsFromFile(): List<GroupedItems> {
+        // 从指定路径读取数据
+        val items = parser.readFromPath(INPUT_PATH)
+        // 打印读取的数据量
+        logI("读取 item 数: ${items.size}")
+        // 按文件名分组
+        return parser.groupByName(items)
+    }
+
+    /**
+     * 将分组数据分块
+     * @return 分块后的字符串列表
+     */
+    private fun chunk(groupedItems: GroupedItems, size: Long): List<String> {
+        // 使用分块器将数据切分为指定大小的块
+        val chunks = chucking.formatToChuckedStrings(size, groupedItems)
+        // 打印分块数量
+        logI("处理 '${groupedItems.filename}' 为 ${chunks.size} 个分块")
+        return chunks
+    }
 }
