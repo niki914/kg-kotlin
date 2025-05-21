@@ -6,7 +6,6 @@ import com.openai.client.okhttp.OpenAIOkHttpClient
 import com.openai.models.ChatModel
 import com.openai.models.chat.completions.ChatCompletionCreateParams
 import interfaces.ILLMJsonExtractor
-import interfaces.ILLMJsonExtractor.Companion.cleanJson
 import utils.logI
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
@@ -16,14 +15,18 @@ abstract class JsonExtractor4Openai<T>(
     apiKeys: List<String>,
     baseUrl: String,
     private val model: String
-) : ILLMJsonExtractor<T> {
+) : ILLMJsonExtractor<T>() {
+    companion object {
+        const val CLIENT_TIMEOUT_SEC: Long = 30
+    }
+
     protected val gson = Gson()
 
     private val clients: List<OpenAIClient> = apiKeys.map { key ->
         OpenAIOkHttpClient.builder()
             .apiKey(key)
             .baseUrl(baseUrl)
-            .timeout(Duration.ofSeconds(60))
+            .timeout(Duration.ofSeconds(CLIENT_TIMEOUT_SEC))
             .build()
     }
 
@@ -32,7 +35,7 @@ abstract class JsonExtractor4Openai<T>(
     override val keyCount: Int
         get() = clients.size
 
-    override fun _getResponseFromLLM(prompt: String): String {
+    override fun getResponseFromLLM(prompt: String): String {
         // 获取下一个客户端
         val client = getNextClient()
 
@@ -56,10 +59,10 @@ abstract class JsonExtractor4Openai<T>(
 
     protected fun extractJsonString(vararg input: String?): String {
         // 生成提示词
-        val prompt = _createPrompt(*input)
+        val prompt = createPrompt(*input)
 
         // 获取大模型回答, 假设为纯 JSON
-        val rawJson = _getResponseFromLLM(prompt)
+        val rawJson = getResponseFromLLM(prompt)
 
         runCatching {
             logI("大模型回答: ${rawJson.take(10)}...")
