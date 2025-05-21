@@ -1,18 +1,24 @@
 package beans
 
-import config.DEEPSEEK_KEYS
+import config.DEEPSEEK_KEY
 import config.GEMINI_KEYS
-import config.ZUKE_KEYS
+import config.ZUKE_KEY
 
 sealed class Api(
     val baseUrl: String,
     val modelName: String,
     val apiKeys: List<String>
 ) {
+    constructor(
+        baseUrl: String,
+        modelName: String,
+        apiKey: String
+    ) : this(baseUrl, modelName, listOf(apiKey))
+
     class Deepseek : Api(
         "https://api.deepseek.com/",
         "deepseek-chat",
-        DEEPSEEK_KEYS
+        DEEPSEEK_KEY
     )
 
     class Gemini : Api(
@@ -24,6 +30,6 @@ sealed class Api(
     class Zuke(modelName: String) : Api(
         "https://zuke.chat/v1/",
         modelName,
-        ZUKE_KEYS
+        ZUKE_KEY
     )
 }
