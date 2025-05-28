@@ -17,6 +17,8 @@ dependencies {
     implementation("com.openai:openai-java:1.6.1")
 //    implementation("com.google.genai:google-genai:0.8.0")
 
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
     // kotlin 依赖
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")

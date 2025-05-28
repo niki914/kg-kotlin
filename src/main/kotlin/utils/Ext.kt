@@ -1,8 +1,13 @@
 package utils
 
+import com.google.gson.GsonBuilder
 import java.awt.Desktop
 import java.io.File
 import java.util.*
+
+val prettyGson by lazy {
+    GsonBuilder().setPrettyPrinting().create()
+}
 
 fun <T> tryGetOrNull(block: () -> T): T? = try {
     block()

@@ -1,12 +1,13 @@
 package utils.baseclasses
 
+import beans.Api
 import com.google.gson.Gson
 import com.openai.client.OpenAIClient
 import com.openai.client.okhttp.OpenAIOkHttpClient
 import com.openai.models.ChatModel
 import com.openai.models.chat.completions.ChatCompletionCreateParams
-import interfaces.ILLMJsonExtractor
-import utils.logI
+import utils.BaseLLMJsonExtractor
+import utils.logV
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
@@ -15,7 +16,13 @@ abstract class JsonExtractor4Openai<T>(
     apiKeys: List<String>,
     baseUrl: String,
     private val model: String
-) : ILLMJsonExtractor<T>() {
+) : BaseLLMJsonExtractor<T>() {
+    constructor(api: Api) : this(
+        api.apiKeys,
+        api.baseUrl,
+        api.modelName
+    )
+
     companion object {
         const val CLIENT_TIMEOUT_SEC: Long = 30
     }
@@ -60,13 +67,12 @@ abstract class JsonExtractor4Openai<T>(
     protected fun extractJsonString(vararg input: String?): String {
         // 生成提示词
         val prompt = createPrompt(*input)
+        logV("提示词:\n$prompt")
 
         // 获取大模型回答, 假设为纯 JSON
         val rawJson = getResponseFromLLM(prompt)
 
-        runCatching {
-            logI("大模型回答: ${rawJson.take(10)}...")
-        }
+        logV("大模型回答:\n$rawJson")
 
         // 清理 JSON 字符串
         val cleanedJson = cleanJson(rawJson)

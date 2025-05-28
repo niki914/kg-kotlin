@@ -1,16 +1,16 @@
-fun getNodePrompt(context: String, data: String): String = "" +
+import beans.NodeJsonData
+import beans.RelationJsonData
+
+fun getNodePrompt(context: String, classes: String, data: String): String = "" +
         "TASK: 你现在处于知识图谱抽取工具链的一环, 你需要根据数据抽取出知识图谱专用的节点的定义, 请确保你的回答是标准的 JSON" +
         "请根据以下文本和上下文主题, 抽取其中的节点实体, 并以 JSON 格式返回结果\n" +
+        "类定义(抽取的节点必须是给定的类的实例, 其中的一些属性可空, 但类定义必须是已经给定的):\n" +
+        "$classes\n" +
         "上下文主题(你应该只获取与主题相关的实体):\n" +
         context +
         "\n\n" +
         "返回格式示例:\n" +
-        "{\n" +
-        "  \"entities\": [\n" +
-        "    {\"name\": \"实体1\", \"description\": \"描述1\"},\n" +
-        "    {\"name\": \"实体2\", \"description\": \"描述2\"}\n" +
-        "  ]\n" +
-        "}" +
+        NodeJsonData.EXAMPLE_STRING +
         "\n\n" +
         "为了节省 token, 你可以输出不格式化的 json\n" +
         "待处理文本:\n" +
@@ -32,12 +32,7 @@ fun getRelationPrompt(givenNodes: String, context: String, data: String): String
         "4. 确保关系组是有意义, 对知识图谱构建有帮助的内容, 否则不要添加" +
         "\n\n" +
         "返回格式示例:\n" +
-        "{\n" +
-        "  \"relations\": [\n" +
-        "    [\"主体1\", \"关系1\", \"客体1\"],\n" +
-        "    [\"主体2\", \"关系2\", \"客体2\"]\n" +
-        "  ]\n" +
-        "}" +
+        RelationJsonData.EXAMPLE_STRING +
         "\n\n" +
         "为了节省 token, 你可以输出不格式化的 json\n" +
         "待处理文本:\n" +

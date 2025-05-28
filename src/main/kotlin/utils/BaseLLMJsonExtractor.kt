@@ -1,11 +1,11 @@
-package interfaces
+package utils
 
 import iLLMJsonExtractorExample
 
 /**
  * @sample iLLMJsonExtractorExample
  */
-abstract class ILLMJsonExtractor<T> {
+abstract class BaseLLMJsonExtractor<T> {
 
     /**
      * 用于处理大模型不听话, 返回了 markdown 代码块包装的 json 时的情况

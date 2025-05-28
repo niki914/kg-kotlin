@@ -5,7 +5,6 @@ import beans.ExtractedData
 import beans.NodeJsonData
 import beans.RelationJsonData
 import interfaces.IDataProcessor
-import interfaces.ILLMJsonExtractor
 
 abstract class DataProcessor : IDataProcessor {
     abstract val context: String
@@ -14,16 +13,16 @@ abstract class DataProcessor : IDataProcessor {
     override val keyCounts: Int
         get() = api.apiKeys.size
 
-    private val nodeExtractor: ILLMJsonExtractor<NodeJsonData> by lazy {
+    private val nodeExtractor: BaseLLMJsonExtractor<NodeJsonData> by lazy {
         NodeExtractor(api)
     }
 
-    private val relationsExtractor: ILLMJsonExtractor<RelationJsonData> by lazy {
+    private val relationsExtractor: BaseLLMJsonExtractor<RelationJsonData> by lazy {
         RelationsExtractor(api)
     }
 
-    override fun parseNodeData(chunk: String): NodeJsonData {
-        val nodeData = nodeExtractor.extract(context, chunk)
+    override fun parseNodeData(classes: String, chunk: String): NodeJsonData {
+        val nodeData = nodeExtractor.extract(context, classes, chunk)
         logD("节点提取完成", "[${chunk.take(6)}...]")
         return nodeData
     }
@@ -60,9 +59,9 @@ abstract class DataProcessor : IDataProcessor {
     }
 
     override fun mergerExtractedData(processResults: List<ExtractedData>): ExtractedData {
-        val mergedEdges = processResults.flatMap { it.edges }.distinct()
-        val mergedNodes = processResults.flatMap { it.nodes }.distinct()
-        val mergedRelations = processResults.flatMap { it.relations }.distinct()
+        val mergedEdges = processResults.mapNotNull { it.edges }.flatten().distinct()
+        val mergedNodes = processResults.mapNotNull { it.nodes }.flatten().distinct()
+        val mergedRelations = processResults.mapNotNull { it.relations }.flatten().distinct()
         mergedRelations.filter {
             val shouldFilter = (it.size == 3)
                     && it[1] in mergedEdges

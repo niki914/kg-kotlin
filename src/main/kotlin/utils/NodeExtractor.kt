@@ -21,8 +21,9 @@ class NodeExtractor(
      */
     override fun createPrompt(vararg input: String?): String {
         val context = tryGetOrNull { input[0] } ?: "[没有明确的主题, 进行宽泛的抽取]"
-        val data = tryGetOrNull { input[1] } ?: "[如果你看见这个, 说明没有待处理数据, 直接返回空 json 体即可]"
-        return getNodePrompt(context, data)
+        val classes = tryGetOrNull { input[1] } ?: "[没有明确的类, 进行宽泛的抽取, 返回时返回空的类, 其他属性正常抽取]"
+        val data = tryGetOrNull { input[2] } ?: "[如果你看见这个, 说明没有待处理数据, 直接返回空 json 体即可]"
+        return getNodePrompt(context, classes, data)
     }
 
     override fun extract(vararg input: String?): NodeJsonData {

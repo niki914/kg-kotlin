@@ -4,14 +4,18 @@ import beans.GroupedItems
 import com.google.gson.GsonBuilder
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
+import interfaces.IYamlParser
 import kotlinx.coroutines.*
 import utils.*
 
 const val INPUT_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\1.json"
+const val EXAMPLE_YAML_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\example.yaml"
+
 private const val ERROR_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\error"
 private const val OUTPUT_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\output"
 private const val CONTEXT = "广东工业大学财务"
-private val API: Api = Api.Zuke("gemini-2.0-flash")
+private val API: Api = Api.Deepseek()
+//    Api.Zuke("gemini-2.0-flash")
 
 /**
  * 主函数: 实现清洗后数据的读取、分组、分块、知识图谱提取和结果导出
@@ -59,8 +63,15 @@ fun main(): Unit = runBlocking {
  * Main 类: 协调数据读取、分块、提取和合并的逻辑
  */
 class Main {
+    // Yaml 解析器
+    private val yamlParser: IYamlParser = YamlParser("classes")
+    private val yamlClasses: String by lazy {
+        val list = yamlParser.readFromPath(EXAMPLE_YAML_PATH)
+        prettyGson.toJson(list)
+    }
+
     // 数据解析器, 负责从文件读取和分组清理后的数据
-    private val parser: ICleanDataParser = CleanDataParser()
+    private val cleanDataParser: ICleanDataParser = CleanDataParser()
 
     // 数据分块器, 负责将分组数据切分为指定大小的块
     private val chucking: IDataChucking = DataChucking()
@@ -100,7 +111,7 @@ class Main {
      */
     private fun processInternal(chunk: String): ExtractedData = try {
         // 提取节点数据
-        val nodeData = dataProcessor.parseNodeData(chunk)
+        val nodeData = dataProcessor.parseNodeData(yamlClasses, chunk)
         // 基于节点数据提取关系
         val relationData = dataProcessor.parseRelationNodeData(nodeData, chunk)
         // 组装节点和关系为 ExtractedData
@@ -128,11 +139,11 @@ class Main {
      */
     fun readItemsFromFile(): List<GroupedItems> {
         // 从指定路径读取数据
-        val items = parser.readFromPath(INPUT_PATH)
+        val items = cleanDataParser.readFromPath(INPUT_PATH)
         // 打印读取的数据量
         logI("读取 item 数: ${items.size}")
         // 按文件名分组
-        return parser.groupByName(items)
+        return cleanDataParser.groupByName(items)
     }
 
     /**

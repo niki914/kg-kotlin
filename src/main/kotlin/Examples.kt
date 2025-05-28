@@ -1,9 +1,9 @@
+import beans.Api
 import beans.ExtractedData
 import beans.GroupedItems
-import config.DEEPSEEK_KEY
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
-import interfaces.ILLMJsonExtractor
+import utils.BaseLLMJsonExtractor
 import utils.CleanDataParser
 import utils.DataChucking
 import utils.baseclasses.JsonExtractor4Openai
@@ -33,24 +33,20 @@ fun iDataChuckingExample() {
 }
 
 fun iLLMJsonExtractorExample() {
-    val extractor: ILLMJsonExtractor<ExtractedData> = object : JsonExtractor4Openai<ExtractedData>(
-        DEEPSEEK_KEY,
-        "https://api.deepseek.com/",
-        "deepseek-chat"
-    ) {
+    val extractor: BaseLLMJsonExtractor<ExtractedData> = object : JsonExtractor4Openai<ExtractedData>(Api.Deepseek()) {
         override fun createPrompt(vararg input: String?): String {
             return """
-            Extract the edges and nodes from the input text and return a JSON object with two fields: 
+            Extract the edges and nodes from the input text and return a JSON object with two fields:
             "edges" (list of strings) and "nodes" (list of strings). Ensure the output is valid JSON.
-            
+
             Input: $input
-            
+
             Example output:
             {
                 "edges": ["edge1", "edge2"],
                 "nodes": ["node1", "node2"]
             }
-            
+
             Return only the JSON object, no additional text.
         """.trimIndent()
         }
