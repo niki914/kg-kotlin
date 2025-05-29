@@ -15,13 +15,13 @@ sealed class Api(
         apiKey: String
     ) : this(baseUrl, modelName, listOf(apiKey))
 
-    class Deepseek : Api(
+    data object Deepseek : Api(
         "https://api.deepseek.com/",
         "deepseek-chat",
         DEEPSEEK_KEY
     )
 
-    class Gemini : Api(
+    data object Gemini : Api(
         "https://generativelanguage.googleapis.com/v1beta/",
         "gemini-2.0-flash",
         GEMINI_KEYS

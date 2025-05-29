@@ -11,10 +11,11 @@ import utils.*
 const val INPUT_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\1.json"
 const val EXAMPLE_YAML_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\example.yaml"
 
-private const val ERROR_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\error"
-private const val OUTPUT_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\output"
-private const val CONTEXT = "广东工业大学财务"
-private val API: Api = Api.Deepseek()
+const val ERROR_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\error"
+const val OUTPUT_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\output"
+
+const val CONTEXT = "广东工业大学财务"
+val API: Api = Api.Deepseek
 //    Api.Zuke("gemini-2.0-flash")
 
 /**
