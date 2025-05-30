@@ -4,6 +4,7 @@ import beans.GroupedItems
 import com.google.gson.GsonBuilder
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
+import interfaces.IDataWriter
 import interfaces.IYamlParser
 import kotlinx.coroutines.*
 import utils.*
@@ -15,8 +16,16 @@ const val ERROR_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\error"
 const val OUTPUT_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\output"
 
 const val CONTEXT = "广东工业大学财务"
-val API: Api = Api.Deepseek
+const val CHUNK_SIZE = 1024L
+
+const val NEO4J_URL = "neo4j://127.0.0.1:7687/"
+const val NEO4J_USERNAME = "neo4j"
+const val NEO4J_PASSWORD = "88888888"
+
+val API: Api by lazy {
+    Api.Deepseek
 //    Api.Zuke("gemini-2.0-flash")
+}
 
 /**
  * 主函数: 实现清洗后数据的读取、分组、分块、知识图谱提取和结果导出
@@ -27,8 +36,12 @@ fun main(): Unit = runBlocking {
     val gson by lazy {
         GsonBuilder().setPrettyPrinting().create()
     }
+
     // 创建 Main 实例, 负责协调数据处理流程
     val main = Main()
+    val dataWriter: IDataWriter by lazy {
+        Neo4jDataWriter(NEO4J_URL, NEO4J_USERNAME, NEO4J_PASSWORD)
+    }
 
     try {
         // 读取输入文件并按文件名分组
@@ -37,19 +50,21 @@ fun main(): Unit = runBlocking {
         // 遍历每个分组, 处理数据并生成知识图谱
         groupedItemsList.forEach { groupedItems ->
             // 处理分组数据, 提取节点和关系, 合并结果
-            val mergedResult = main.process(groupedItems)
+            val mergedResult = main.process(groupedItems, CHUNK_SIZE)
 
             // 将合并结果序列化为 JSON 并写入输出文件
             writeStringToFile(OUTPUT_DIR, groupedItems.filename, gson.toJson(mergedResult))
+            dataWriter.writeData(mergedResult)
 
             // 打印处理完成日志
             logD("${groupedItems.filename} 处理完成")
-            logI("已写入文件: ${groupedItems.filename}")
+            logV(mergedResult.toString())
+//            logI("已写入文件: ${groupedItems.filename}")
         }
 
         // 打开输出目录, 方便查看结果
-        logD("打开输出文件夹")
-        openFolder(OUTPUT_DIR)
+//        logD("打开输出文件夹")
+//        openFolder(OUTPUT_DIR)
     } catch (e: Exception) {
         // 捕获主流程异常, 打印错误日志
         logE("主函数运行出错")
@@ -87,7 +102,7 @@ class Main {
      * 处理单个分组数据: 分块、提取节点/关系、合并结果
      * @return 合并后的知识图谱数据(节点、边、关系)
      */
-    suspend fun process(groupedItems: GroupedItems, eachSize: Long = 2048L): ExtractedData {
+    suspend fun process(groupedItems: GroupedItems, eachSize: Long = 1024L): ExtractedData {
         // 将分组数据分块
         val chunks = chunk(groupedItems, eachSize)
 

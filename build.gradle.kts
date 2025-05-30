@@ -7,6 +7,8 @@ group = "org.example"
 version = "1.0-SNAPSHOT"
 
 dependencies {
+    implementation("org.slf4j:slf4j-nop:1.7.32")
+
     // ansi 日志颜色
     implementation("org.fusesource.jansi:jansi:2.4.0")
 
@@ -17,8 +19,12 @@ dependencies {
     implementation("com.openai:openai-java:1.6.1")
 //    implementation("com.google.genai:google-genai:0.8.0")
 
+    // neo4j
+    implementation("org.neo4j.driver:neo4j-java-driver:5.28.5")
+
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.17.2")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.2")
+
     // kotlin 依赖
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")

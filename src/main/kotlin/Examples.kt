@@ -9,6 +9,39 @@ import utils.DataChucking
 import utils.baseclasses.JsonExtractor4Openai
 import utils.logE
 
+val testData = ExtractedData(
+    edges = listOf("制定", "规范", "负责", "监督", "使用", "包含"),
+    nodes = listOf(
+        "广东工业大学财务",
+        "国家社会科学基金及教育部高等学校哲学社会科学研究项目经费管理办法",
+        "国家社科基金及教育部哲社项目资金管理",
+        "学校",
+        "项目负责人",
+        "业务费"
+    ),
+    relations = listOf(
+        listOf("广东工业大学财务", "制定", "国家社会科学基金及教育部高等学校哲学社会科学研究项目经费管理办法"),
+        listOf(
+            "国家社会科学基金及教育部高等学校哲学社会科学研究项目经费管理办法",
+            "规范",
+            "国家社会科学基金及教育部高等学校哲学社会科学研究项目经费的使用和管理"
+        ),
+        listOf("学校", "负责", "国家社科基金及教育部哲社项目资金管理"),
+        listOf("学校", "监督", "国家社科基金及教育部哲社项目资金管理"),
+        listOf("项目负责人", "使用", "国家社科基金及教育部哲社项目资金"),
+        listOf("项目负责人", "负责", "国家社科基金及教育部哲社项目资金合规性"),
+        listOf("业务费", "包含", "图书购置"),
+        listOf("业务费", "包含", "资料收集"),
+        listOf("业务费", "包含", "复印翻拍"),
+        listOf("业务费", "包含", "文献检索"),
+        listOf("业务费", "包含", "数据采集"),
+        listOf("业务费", "包含", "资料翻译"),
+        listOf("业务费", "包含", "印刷出版"),
+        listOf("业务费", "包含", "会议差旅"),
+        listOf("业务费", "包含", "国际合作与交流"),
+    )
+)
+
 fun iCleanDataParserExample() {
     val parser: ICleanDataParser = CleanDataParser()
 
@@ -33,7 +66,7 @@ fun iDataChuckingExample() {
 }
 
 fun iLLMJsonExtractorExample() {
-    val extractor: BaseLLMJsonExtractor<ExtractedData> = object : JsonExtractor4Openai<ExtractedData>(Api.Deepseek()) {
+    val extractor: BaseLLMJsonExtractor<ExtractedData> = object : JsonExtractor4Openai<ExtractedData>(Api.Deepseek) {
         override fun createPrompt(vararg input: String?): String {
             return """
             Extract the edges and nodes from the input text and return a JSON object with two fields:
