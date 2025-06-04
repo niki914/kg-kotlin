@@ -27,6 +27,8 @@ class Neo4jDataWriter(url: String, username: String, password: String) : IDataWr
             logD("neo4j 认证成功")
         }
 
+        TODO("先封装 Cypher 语句的调用工具类")
+
         val nodes = data.nodes ?: emptyList()
         val relations = data.relations ?: emptyList()
 

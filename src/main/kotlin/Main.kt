@@ -23,8 +23,8 @@ const val NEO4J_USERNAME = "neo4j"
 const val NEO4J_PASSWORD = "88888888"
 
 val API: Api by lazy {
-    Api.Deepseek
-//    Api.Zuke("gemini-2.0-flash")
+//    Api.Deepseek
+    Api.Zuke("gemini-2.0-flash")
 }
 
 /**
@@ -42,6 +42,9 @@ fun main(): Unit = runBlocking {
     val dataWriter: IDataWriter by lazy {
         Neo4jDataWriter(NEO4J_URL, NEO4J_USERNAME, NEO4J_PASSWORD)
     }
+
+    dataWriter.writeData(testData)
+    pause()
 
     try {
         // 读取输入文件并按文件名分组

@@ -1,9 +1,6 @@
 package utils
 
-import beans.Api
-import beans.ExtractedData
-import beans.NodeJsonData
-import beans.RelationJsonData
+import beans.*
 import interfaces.IDataProcessor
 
 abstract class DataProcessor : IDataProcessor {
@@ -47,10 +44,20 @@ abstract class DataProcessor : IDataProcessor {
             ?.mapNotNull { it.name }
             ?.filter { it.isNotBlank() }
             ?: emptyList()
+
         val edges = relationData.relations
             ?.map { it[1] }
-            ?.filter { it.isNotBlank() }
-            ?: emptyList()
+            ?.mapNotNull { edgeName ->
+                val yamlClass = nodeData.entities?.find { it.name == edgeName }?.yamlClass
+                if (!yamlClass?.className.isNullOrBlank()) {
+                    edgeName to yamlClass!!
+                } else {
+                    null
+                }
+            }
+            ?.toMap()
+            ?: emptyMap()
+
         val relations = relationData.relations ?: emptyList()
 
         logD("拼装结果", "[${chunk.take(6)}...]")
@@ -59,14 +66,19 @@ abstract class DataProcessor : IDataProcessor {
     }
 
     override fun mergerExtractedData(processResults: List<ExtractedData>): ExtractedData {
+        val mergedNodes = mutableMapOf<String, YamlClass>()
+        processResults.forEach { result ->
+            result.nodes?.let { edges ->
+                mergedNodes.putAll(edges)
+            }
+        }
         val mergedEdges = processResults.mapNotNull { it.edges }.flatten().distinct()
-        val mergedNodes = processResults.mapNotNull { it.nodes }.flatten().distinct()
         val mergedRelations = processResults.mapNotNull { it.relations }.flatten().distinct()
         mergedRelations.filter {
             val shouldFilter = (it.size == 3)
                     && it[1] in mergedEdges
-                    && it[0] in mergedNodes
-                    && it[2] in mergedNodes
+                    && it[0] in mergedNodes.keys
+                    && it[2] in mergedNodes.keys
             if (shouldFilter) {
                 logW("过滤: $it")
             }
@@ -74,6 +86,6 @@ abstract class DataProcessor : IDataProcessor {
             shouldFilter
         }
 
-        return ExtractedData(mergedEdges, mergedNodes, mergedRelations)
+        return ExtractedData(mergedNodes, mergedEdges, mergedRelations)
     }
 }

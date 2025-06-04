@@ -1,6 +1,7 @@
 import beans.Api
 import beans.ExtractedData
 import beans.GroupedItems
+import beans.YamlClass
 import interfaces.ICleanDataParser
 import interfaces.IDataChucking
 import utils.BaseLLMJsonExtractor
@@ -10,14 +11,21 @@ import utils.baseclasses.JsonExtractor4Openai
 import utils.logE
 
 val testData = ExtractedData(
-    edges = listOf("制定", "规范", "负责", "监督", "使用", "包含"),
-    nodes = listOf(
+    edges = listOf(
         "广东工业大学财务",
         "国家社会科学基金及教育部高等学校哲学社会科学研究项目经费管理办法",
         "国家社科基金及教育部哲社项目资金管理",
         "学校",
         "项目负责人",
         "业务费"
+    ),
+    nodes = mapOf(
+        "制定" to YamlClass("ObjectA", null),
+        "规范" to YamlClass("ObjectB", null),
+        "负责" to YamlClass("ObjectC", null),
+        "监督" to YamlClass("ObjectD", null),
+        "使用" to YamlClass("ObjectE", null),
+        "包含" to YamlClass("ObjectF", null)
     ),
     relations = listOf(
         listOf("广东工业大学财务", "制定", "国家社会科学基金及教育部高等学校哲学社会科学研究项目经费管理办法"),
