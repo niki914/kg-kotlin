@@ -1,14 +1,14 @@
-package beans
-
-import config.DEEPSEEK_KEY
-import config.GEMINI_KEYS
-import config.ZUKE_KEY
+import Api.Deepseek.DEEPSEEK_KEY
+import Api.Deepseek.GEMINI_KEYS
+import Api.Deepseek.ZUKE_KEY
 
 sealed class Api(
     val baseUrl: String,
     val modelName: String,
     val apiKeys: List<String>
 ) {
+
+
     constructor(
         baseUrl: String,
         modelName: String,
@@ -22,8 +22,8 @@ sealed class Api(
     )
 
     data object Gemini : Api(
-        "https://generativelanguage.googleapis.com/v1beta/",
-        "gemini-2.0-flash",
+        "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "gemini-2.5-flash",
         GEMINI_KEYS
     )
 

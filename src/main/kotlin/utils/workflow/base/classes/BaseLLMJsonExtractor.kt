@@ -1,10 +1,5 @@
-package utils
+package utils.workflow.base.classes
 
-import iLLMJsonExtractorExample
-
-/**
- * @sample iLLMJsonExtractorExample
- */
 abstract class BaseLLMJsonExtractor<T> {
 
     /**
@@ -44,7 +39,9 @@ abstract class BaseLLMJsonExtractor<T> {
     protected abstract fun getResponseFromLLM(prompt: String): String
 
     /**
-     * 外部应直接调用此方法来提取 json
+     * ~~外部应直接调用此方法来提取 json~~
+     *
+     * 子类应该定义一个参数更安全的版本来暴露给外界
      */
-    abstract fun extract(vararg input: String?): T
+    protected abstract fun extract(vararg input: String?): T
 }

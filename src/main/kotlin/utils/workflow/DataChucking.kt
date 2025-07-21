@@ -1,7 +1,7 @@
-package utils
+package utils.workflow
 
 import beans.GroupedItems
-import interfaces.IDataChucking
+import utils.workflow.base.interfaces.IDataChucking
 import kotlin.math.ceil
 
 class DataChucking : IDataChucking {

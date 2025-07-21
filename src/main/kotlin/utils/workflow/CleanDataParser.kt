@@ -1,8 +1,8 @@
-package utils
+package utils.workflow
 
 import beans.GroupedItems
 import beans.Item
-import interfaces.ICleanDataParser
+import utils.workflow.base.interfaces.ICleanDataParser
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.nio.file.Paths

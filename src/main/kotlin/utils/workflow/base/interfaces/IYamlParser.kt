@@ -1,6 +1,6 @@
-package interfaces
+package utils.workflow.base.interfaces
 
-import beans.YamlClass
+import beans.ClassDefinition
 
 /**
  * YAML 解析器接口，定义从指定路径读取并解析 YAML 文件的方法
@@ -12,5 +12,5 @@ interface IYamlParser {
      * @return 解析后的 YamlClass 列表
      * @throws IllegalArgumentException 如果文件不存在或不是文件
      */
-    fun readFromPath(absolutePath: String): List<YamlClass>
+    fun readFromPath(absolutePath: String): List<ClassDefinition>
 }

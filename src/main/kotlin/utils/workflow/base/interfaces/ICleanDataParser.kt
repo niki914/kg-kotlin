@@ -1,12 +1,8 @@
-package interfaces
+package utils.workflow.base.interfaces
 
 import beans.GroupedItems
 import beans.Item
-import iCleanDataParserExample
 
-/**
- * @sample iCleanDataParserExample
- */
 interface ICleanDataParser {
     /**
      * 读取文件为 Item 对象

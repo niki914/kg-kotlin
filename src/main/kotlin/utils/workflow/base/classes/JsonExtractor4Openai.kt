@@ -1,12 +1,11 @@
-package utils.baseclasses
+package utils.workflow.base.classes
 
-import beans.Api
+import Api
 import com.google.gson.Gson
 import com.openai.client.OpenAIClient
 import com.openai.client.okhttp.OpenAIOkHttpClient
 import com.openai.models.ChatModel
 import com.openai.models.chat.completions.ChatCompletionCreateParams
-import utils.BaseLLMJsonExtractor
 import utils.logV
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
@@ -82,4 +81,10 @@ abstract class JsonExtractor4Openai<T>(
 
     protected inline fun <reified D> String.asJsonClass(): D =
         gson.fromJson(this, D::class.java) ?: throw IllegalStateException("gson 解析出错")
+
+    protected inline fun <reified D> String.asJsonClassSafe(): D? = try {
+        asJsonClass<D>()
+    } catch (_: Throwable) {
+        null
+    }
 }
