@@ -3,6 +3,7 @@ import kotlinx.coroutines.runBlocking
 import utils.*
 import workflow.neo4j.Neo4jWriter
 
+const val INPUT_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\"
 const val INPUT_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\1.json"
 const val EXAMPLE_YAML_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\example.yaml"
 
@@ -10,7 +11,7 @@ const val ERROR_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\error"
 const val OUTPUT_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\output"
 
 const val CONTEXT = "广东工业大学财务"
-const val CHUNK_SIZE = 1024L
+const val CHUNK_SIZE = 2048L
 
 const val NEO4J_URL = "neo4j://10.24.2.101:7687/"
 const val NEO4J_USERNAME = "neo4j"
@@ -42,12 +43,24 @@ fun main(): Unit = runBlocking {
         4. 写入 neo4j 图数据库
      */
     Neo4jWriter(NEO4J_URL, NEO4J_USERNAME, NEO4J_PASSWORD).use { neo4jWriter ->
-
-//    neo4jWriter.removeAll()
+        neo4jWriter.removeAll()
 
         try {
             // 读取输入文件并按文件名分组
-            val groupedItemsList: List<GroupedItems> = workFlow.readItemsFromFile()
+//            val groupedItemsList: List<GroupedItems> = workFlow.readItemsFromFile()
+            val groupedItemsList: List<GroupedItems> = INPUT_DIR.asFolderAndForEach {
+                try {
+                    logV("处理: " + it.path)
+                    if (it.name.endsWith(".md") || it.name.endsWith(".txt")) {
+                        GroupedItems.fromSingleString(it.readText(Charsets.UTF_8), it.name)
+                    } else {
+                        null
+                    }
+                } catch (t: Throwable) {
+                    logE("遍历文件出错", "", t)
+                    null
+                }
+            }
 
             // 遍历每个分组, 处理数据并生成知识图谱
             groupedItemsList.forEach { groupedItems ->

@@ -17,7 +17,6 @@ dependencies {
 
     // llm
     implementation("com.openai:openai-java:1.6.1")
-//    implementation("com.google.genai:google-genai:0.8.0")
 
     // neo4j
     implementation("org.neo4j.driver:neo4j-java-driver:5.28.5")
