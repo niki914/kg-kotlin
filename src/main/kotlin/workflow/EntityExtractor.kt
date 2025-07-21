@@ -1,13 +1,16 @@
-package utils.workflow
+package workflow
 
 import Api
 import beans.ClassDefinition
 import beans.Entities
 import beans.Entity
-import utils.workflow.base.classes.JsonExtractor4Openai
+import workflow.base.classes.JsonExtractor4Openai
 import utils.prettyGson
 import utils.tryGetOrNull
 
+/**
+ * 节点提取器
+ */
 class EntityExtractor(
     apiKeys: List<String>,
     baseUrl: String,

@@ -2,6 +2,9 @@ package beans
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * 大模型应该返回的数据结构，通过 gson 序列化
+ */
 data class Entities(
     @SerializedName("entities") val entities: List<Entity>?
 )

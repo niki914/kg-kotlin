@@ -1,4 +1,4 @@
-package utils.workflow.base.classes
+package workflow.base.classes
 
 import Api
 import com.google.gson.Gson

@@ -1,4 +1,4 @@
-package utils.workflow.neo4j
+package workflow.neo4j
 
 import beans.Entity
 import org.jetbrains.annotations.ApiStatus.Experimental
@@ -8,6 +8,9 @@ import org.neo4j.driver.GraphDatabase
 import org.neo4j.driver.exceptions.Neo4jException
 import utils.*
 
+/**
+ * 将数据写入 neo4j 数据库的 writer
+ */
 class Neo4jWriter(url: String, username: String, password: String) : AutoCloseable {
 
     private val driver: Driver = GraphDatabase.driver(url, AuthTokens.basic(username, password))

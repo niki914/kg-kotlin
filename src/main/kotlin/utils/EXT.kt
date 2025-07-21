@@ -1,11 +1,12 @@
 package utils
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import java.awt.Desktop
 import java.io.File
 import java.util.*
 
-val prettyGson by lazy {
+val prettyGson: Gson by lazy {
     GsonBuilder().setPrettyPrinting().create()
 }
 

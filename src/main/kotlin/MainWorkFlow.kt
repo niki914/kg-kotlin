@@ -1,18 +1,18 @@
 import beans.ClassDefinition
+import beans.ExtractedData
 import beans.GroupedItems
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import utils.*
-import utils.workflow.CleanDataParser
-import utils.workflow.DataChucking
-import utils.workflow.DataProcessor
-import utils.workflow.YamlParser
-import utils.workflow.base.interfaces.ICleanDataParser
-import utils.workflow.base.interfaces.IDataChucking
-import utils.workflow.base.interfaces.IDataProcessor
-import utils.workflow.base.interfaces.IYamlParser
+import workflow.cleaning.CleanDataParser
+import workflow.cleaning.DataChucking
+import workflow.DataProcessor
+import workflow.YamlParser
+import workflow.base.interfaces.ICleanDataParser
+import workflow.base.interfaces.IDataChucking
+import workflow.base.interfaces.IYamlParser
 
 /**
  * MainWorkFlow 类: 协调数据读取、分块、提取和合并的逻辑
@@ -40,7 +40,7 @@ class MainWorkFlow {
      * 处理单个分组数据: 分块、提取节点/关系、合并结果
      * @return 合并后的知识图谱数据(节点、边、关系)
      */
-    suspend fun process(groupedItems: GroupedItems, eachSize: Long = 1024L): IDataProcessor.ExtractedData2 {
+    suspend fun process(groupedItems: GroupedItems, eachSize: Long = 1024L): ExtractedData {
         // 将分组数据分块
         val chunks = chunk(groupedItems, eachSize)
 
@@ -65,7 +65,7 @@ class MainWorkFlow {
      * 处理单个分块: 提取节点和关系, 组装 ExtractedData
      * @return 提取的知识图谱数据(节点、边、关系)
      */
-    private fun processInternal(chunk: String): IDataProcessor.ExtractedData2 = try {
+    private fun processInternal(chunk: String): ExtractedData = try {
         // 提取节点数据
         val entites = dataProcessor.processChunkToEntities(classDefinitions, chunk)
 
@@ -83,7 +83,7 @@ class MainWorkFlow {
         logD("记录为错误", "[${chunk.take(6)}...]")
         t.logE()
         writeStringToFile(ERROR_DIR, "${chunk.hashCode()}.txt", chunk)
-        IDataProcessor.ExtractedData2()
+        ExtractedData()
     }.also {
         // 打印分块处理完成日志
         logD("处理完成", "[${chunk.take(6)}...]")
@@ -93,7 +93,7 @@ class MainWorkFlow {
      * 合并多个分块的提取结果
      * @return 合并后的知识图谱数据
      */
-    private fun merge(list: List<IDataProcessor.ExtractedData2>): IDataProcessor.ExtractedData2 =
+    private fun merge(list: List<ExtractedData>): ExtractedData =
         dataProcessor.mergerExtractedData(list)
 
     /**

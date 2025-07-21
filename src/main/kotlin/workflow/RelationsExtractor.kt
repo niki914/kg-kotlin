@@ -1,11 +1,14 @@
-package utils.workflow
+package workflow
 
 import Api
 import beans.Relations
-import utils.workflow.base.classes.JsonExtractor4Openai
+import workflow.base.classes.JsonExtractor4Openai
 import utils.prettyGson
 import utils.tryGetOrNull
 
+/**
+ * 关系提取器
+ */
 class RelationsExtractor(
     apiKeys: List<String>,
     baseUrl: String,

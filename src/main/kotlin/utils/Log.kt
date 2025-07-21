@@ -3,6 +3,9 @@ package utils
 import org.fusesource.jansi.Ansi
 import org.fusesource.jansi.AnsiConsole
 
+/**
+ * 日志系统，在 terminal 中带有颜色
+ */
 object Log {
     init {
         AnsiConsole.systemInstall() // 启用 Jansi

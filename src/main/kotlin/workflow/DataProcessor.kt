@@ -1,10 +1,10 @@
-package utils.workflow
+package workflow
 
 import Api
 import beans.*
 import utils.logD
 import utils.logV
-import utils.workflow.base.interfaces.IDataProcessor
+import workflow.base.interfaces.IDataProcessor
 
 abstract class DataProcessor : IDataProcessor {
     abstract val context: String
@@ -40,7 +40,7 @@ abstract class DataProcessor : IDataProcessor {
         entities: Entities,
         relations: Relations,
         chunk: String
-    ): IDataProcessor.ExtractedData2 {
+    ): ExtractedData {
         val allEntities = entities.entities?.map { it.name } ?: emptyList()
 
         val filteredRelations = Relations(relations = relations.relations?.filter {
@@ -49,10 +49,10 @@ abstract class DataProcessor : IDataProcessor {
 
         logD("拼装结果", "[${chunk.take(6)}...]")
 
-        return IDataProcessor.ExtractedData2(entities, filteredRelations, emptyList())
+        return ExtractedData(entities, filteredRelations, emptyList())
     }
 
-    override fun mergerExtractedData(extractedDatas: List<IDataProcessor.ExtractedData2>): IDataProcessor.ExtractedData2 {
+    override fun mergerExtractedData(extractedDatas: List<ExtractedData>): ExtractedData {
         val entities = extractedDatas
             .flatMap { it.entities.entities.orEmpty() }
             .distinct()
@@ -61,7 +61,7 @@ abstract class DataProcessor : IDataProcessor {
             .flatMap { it.relations.relations.orEmpty() }
             .distinct()
 
-        val datas: List<IDataProcessor.ExtractedData2.Data> = relations.mapNotNull { list ->
+        val datas: List<ExtractedData.Data> = relations.mapNotNull { list ->
             val name1 = list[0]
             val name2 = list[2]
 
@@ -69,12 +69,12 @@ abstract class DataProcessor : IDataProcessor {
             val entity2 = entities.find { it.name == name2 } ?: Entity(name2)
             val relation = list[1]
 
-            IDataProcessor.ExtractedData2.Data(entity1, relation, entity2)
+            ExtractedData.Data(entity1, relation, entity2)
         }
 
         logV("合并结果:\n${datas.joinToString("\n")}")
 
-        return IDataProcessor.ExtractedData2(
+        return ExtractedData(
             Entities(entities),
             Relations(relations),
             datas

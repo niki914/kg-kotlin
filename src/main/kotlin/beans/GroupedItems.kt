@@ -2,6 +2,8 @@ package beans
 
 import kotlinx.serialization.Serializable
 
+// 这些都是处理清洗后的数据用的数据类
+
 @Serializable
 data class GroupedItems(
     val filename: String,

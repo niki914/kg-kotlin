@@ -1,4 +1,4 @@
-package utils.workflow.base.interfaces
+package workflow.base.interfaces
 
 import beans.ClassDefinition
 

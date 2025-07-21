@@ -1,9 +1,9 @@
-package utils.workflow
+package workflow
 
 import beans.ClassDefinition
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
-import utils.workflow.base.interfaces.IYamlParser
+import workflow.base.interfaces.IYamlParser
 import java.io.File
 
 /**
