@@ -4,9 +4,8 @@ import Api
 import beans.ClassDefinition
 import beans.Entities
 import beans.Entity
-import workflow.base.classes.JsonExtractor4Openai
-import utils.prettyGson
 import utils.tryGetOrNull
+import workflow.base.classes.JsonExtractor4Openai
 
 /**
  * 节点提取器
@@ -95,7 +94,7 @@ $data
     }
 
     private fun getExample(): String {
-        return prettyGson.toJson(
+        return gson.toJson(
             Entities(
                 listOf(
                     Entity(
@@ -112,13 +111,13 @@ $data
     }
 
     private fun getDefaultClassDefinition(): String {
-        return prettyGson.toJson(
+        return gson.toJson(
             listOf(ClassDefinition())
         )
     }
 
     fun extract(classes: List<ClassDefinition>, context: String, data: String): Entities {
-        val classesStr = prettyGson.toJson(classes)
-        return extract(classesStr, context, data)
+        val classesStr = gson.toJson(classes)
+        return extract(context, classesStr, data)
     }
 }

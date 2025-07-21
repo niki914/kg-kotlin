@@ -10,8 +10,8 @@ const val EXAMPLE_YAML_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\example.yaml"
 const val ERROR_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\error"
 const val OUTPUT_DIR = "C:\\Users\\NIKI\\Desktop\\clean\\output"
 
-const val CONTEXT = "广东工业大学财务"
-const val CHUNK_SIZE = 2048L
+const val CONTEXT = "论文《基于区块链的生物医学知识图谱协同构建技术研究》"
+const val CHUNK_SIZE = 1400L
 
 const val NEO4J_URL = "neo4j://10.24.2.101:7687/"
 const val NEO4J_USERNAME = "neo4j"
@@ -43,7 +43,7 @@ fun main(): Unit = runBlocking {
         4. 写入 neo4j 图数据库
      */
     Neo4jWriter(NEO4J_URL, NEO4J_USERNAME, NEO4J_PASSWORD).use { neo4jWriter ->
-        neo4jWriter.removeAll()
+//        neo4jWriter.removeAll()
 
         try {
             // 读取输入文件并按文件名分组

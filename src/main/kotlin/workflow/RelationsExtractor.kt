@@ -2,9 +2,8 @@ package workflow
 
 import Api
 import beans.Relations
-import workflow.base.classes.JsonExtractor4Openai
-import utils.prettyGson
 import utils.tryGetOrNull
+import workflow.base.classes.JsonExtractor4Openai
 
 /**
  * 关系提取器
@@ -45,7 +44,7 @@ class RelationsExtractor(
          *
          * 约束条件：
          * 1. 所有抽取出的三元组**必须**遵循 [主体, 关系, 客体] 的格式（a --b-> c）。
-         * 2. 每个三元组的主体**必须**是来自给定实体列表中的一个。如果发现同义词或指向同一个事物，请使用给定的实体名称来代替。
+         * 2. 每个三元组的主体或客体**必须**是来自给定实体列表中的一个。如果发现同义词或指向同一个事物，请使用给定的实体名称来代替。
          * 3. 关系（谓词）应该清楚地表达主体和客体之间的联系。请保持其简洁明了，避免任何描述性或形容性的词语。
          * 4. 三元组必须是有意义的，并且能为知识图谱贡献有价值的信息。请舍弃任何无意义的关系。
          * 5. 谓词尽可能使用中文 zh_CN 书写
@@ -74,7 +73,7 @@ Based on the provided text and context, extract relevant triple relations and re
 
 Constraints:
 1. All extracted triples **MUST** adhere to the [subject, predicate, object] format (e.g., a --b-> c).
-2. The subject of each triple **MUST** be an entity from the provided list. If you find synonyms or references to the same thing, use the given entity name as a substitute.
+2. One of the subject and object of each triple **MUST** be an entity from the provided list. If you find synonyms or references to the same thing, use the given entity name as a substitute.
 3. The predicate (relation) should clearly express the connection between the subject and object. Keep it concise and simple, avoiding any descriptive or adjectival words.
 4. Triples must be meaningful and contribute valuable information to the knowledge graph. Discard any meaningless relations.
 5. Predicates should be in Chinese (zh_CN) whenever possible.
@@ -98,7 +97,7 @@ $data
     }
 
     private fun getExample(): String {
-        return prettyGson.toJson(
+        return gson.toJson(
             Relations(
                 listOf(
                     listOf("Tom", "EAT", "apple"),
@@ -109,7 +108,7 @@ $data
     }
 
     fun extract(givenEntities: List<String>, context: String, data: String): Relations {
-        val givenEntitiesStr = prettyGson.toJson(givenEntities)
+        val givenEntitiesStr = gson.toJson(givenEntities)
         return extract(givenEntitiesStr, context, data)
     }
 }

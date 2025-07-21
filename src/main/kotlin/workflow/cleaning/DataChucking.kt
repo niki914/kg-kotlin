@@ -5,7 +5,41 @@ import workflow.base.interfaces.IDataChucking
 import kotlin.math.ceil
 
 class DataChucking : IDataChucking {
+
+    private fun simpleChuck(maxSize: Long, raw: String): List<String> {
+        require(maxSize > 0) { "maxSize must be a positive number." }
+
+        // 如果原始字符串为空，直接返回一个空列表
+        if (raw.isEmpty()) {
+            return emptyList()
+        }
+
+        val result = mutableListOf<String>()
+        var startIndex = 0
+
+        while (startIndex < raw.length) {
+            // 计算当前子字符串的结束索引
+            // 确保不会超出原始字符串的边界
+            val endIndex = (startIndex + maxSize).coerceAtMost(raw.length.toLong()).toInt()
+
+            // 从原始字符串中截取子字符串并添加到结果列表中
+            result.add(raw.substring(startIndex, endIndex))
+
+            // 更新起始索引为下一个子字符串的开始位置
+            startIndex = endIndex
+        }
+
+        return result
+    }
+
     override fun formatToChuckedStrings(chuckSize: Long, groupedItems: GroupedItems): List<String> {
+        val sb = StringBuilder()
+        groupedItems.items.forEach { item ->
+            sb.append(item.text)
+            sb.append("\n")
+        }
+        return simpleChuck(chuckSize, sb.toString()) // 暂时未能正确实现复杂分快
+
         if (chuckSize <= 0) return emptyList()
 
         val result = mutableListOf<String>()
