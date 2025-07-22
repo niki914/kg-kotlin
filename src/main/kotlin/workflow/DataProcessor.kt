@@ -52,7 +52,7 @@ abstract class DataProcessor : IDataProcessor {
         return ExtractedData(entities, filteredRelations, emptyList())
     }
 
-    override fun mergerExtractedData(extractedDatas: List<ExtractedData>): ExtractedData {
+    override fun mergerExtractedData(extractedDatas: List<ExtractedData>, unknownEntityTag: String): ExtractedData {
         val entities = extractedDatas
             .flatMap { it.entities.entities.orEmpty() }
             .distinct()
@@ -65,8 +65,8 @@ abstract class DataProcessor : IDataProcessor {
             val name1 = list[0]
             val name2 = list[2]
 
-            val entity1 = entities.find { it.name == name1 } ?: Entity(name1)
-            val entity2 = entities.find { it.name == name2 } ?: Entity(name2)
+            val entity1 = entities.find { it.name == name1 } ?: Entity(name1, unknownEntityTag)
+            val entity2 = entities.find { it.name == name2 } ?: Entity(name2, unknownEntityTag)
             val relation = list[1]
 
             ExtractedData.Data(entity1, relation, entity2)

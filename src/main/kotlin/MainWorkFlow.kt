@@ -6,13 +6,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import utils.*
-import workflow.cleaning.CleanDataParser
-import workflow.cleaning.DataChucking
 import workflow.DataProcessor
 import workflow.YamlParser
 import workflow.base.interfaces.ICleanDataParser
 import workflow.base.interfaces.IDataChucking
 import workflow.base.interfaces.IYamlParser
+import workflow.cleaning.CleanDataParser
+import workflow.cleaning.DataChucking
 
 /**
  * MainWorkFlow 类: 协调数据读取、分块、提取和合并的逻辑
@@ -40,7 +40,11 @@ class MainWorkFlow {
      * 处理单个分组数据: 分块、提取节点/关系、合并结果
      * @return 合并后的知识图谱数据(节点、边、关系)
      */
-    suspend fun process(groupedItems: GroupedItems, eachSize: Long = 1024L): ExtractedData {
+    suspend fun process(
+        groupedItems: GroupedItems,
+        eachSize: Long = 1024L,
+        unknownEntityTag: String = "Entity"
+    ): ExtractedData {
         // 将分组数据分块
         val chunks = chunk(groupedItems, eachSize)
 
@@ -57,7 +61,7 @@ class MainWorkFlow {
                 }
             }.awaitAll()
             // 合并所有分块的提取结果
-            merge(results)
+            merge(results, unknownEntityTag)
         }
     }
 
@@ -93,8 +97,8 @@ class MainWorkFlow {
      * 合并多个分块的提取结果
      * @return 合并后的知识图谱数据
      */
-    private fun merge(list: List<ExtractedData>): ExtractedData =
-        dataProcessor.mergerExtractedData(list)
+    private fun merge(list: List<ExtractedData>, unknownEntityTag: String = "Entity"): ExtractedData =
+        dataProcessor.mergerExtractedData(list, unknownEntityTag)
 
     /**
      * 读取输入文件并分组

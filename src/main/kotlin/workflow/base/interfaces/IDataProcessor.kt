@@ -1,6 +1,9 @@
 package workflow.base.interfaces
 
-import beans.*
+import beans.ClassDefinition
+import beans.Entities
+import beans.ExtractedData
+import beans.Relations
 
 /**
  * 封装大模型对节点、关系的抽取逻辑
@@ -17,5 +20,5 @@ interface IDataProcessor {
         chunk: String
     ): ExtractedData
 
-    fun mergerExtractedData(extractedDatas: List<ExtractedData>): ExtractedData
+    fun mergerExtractedData(extractedDatas: List<ExtractedData>, unknownEntityTag: String = "Entity"): ExtractedData
 }
