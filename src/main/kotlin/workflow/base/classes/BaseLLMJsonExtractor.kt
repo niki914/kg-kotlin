@@ -1,6 +1,22 @@
 package workflow.base.classes
 
+import com.google.gson.JsonParser
+
 abstract class BaseLLMJsonExtractor<T> {
+
+    private fun fetchJsonWithRegex(raw: String): String {
+        val markdownRegex = Regex("```.*\\s*([\\s\\S]*?)\\s*```")
+        val markdownMatch = markdownRegex.find(raw)
+
+        return if (markdownMatch != null) {
+            markdownMatch.groupValues[1].trim()
+        } else {
+            val jsonRegex = Regex("\\{\\s*([\\s\\S]*?)\\s\\}") // 匹配 JSON 对象的正则
+            val jsonMatch = jsonRegex.find(raw)
+
+            jsonMatch?.value?.trim() ?: raw.trim()
+        }
+    }
 
     /**
      * 用于处理大模型不听话, 返回了 markdown 代码块包装的 json 时的情况
@@ -8,19 +24,20 @@ abstract class BaseLLMJsonExtractor<T> {
     protected fun cleanJson(raw: String): Result<String> {
         var cleaned = raw.trim()
 
-        // 移除 ```json 或 ``` 前缀和后缀
-        if (cleaned.startsWith("```json")) {
-            cleaned = cleaned.removePrefix("```json").removeSuffix("```").trim()
-        } else if (cleaned.startsWith("```")) {
-            cleaned = cleaned.removePrefix("```").removeSuffix("```").trim()
+        try {
+            JsonParser.parseString(cleaned)
+            return Result.success(cleaned)
+        } catch (_: Exception) {
         }
 
-        // 确保是有效的JSON对象
-        if (!cleaned.startsWith("{") || !cleaned.endsWith("}")) {
-            return Result.failure(IllegalStateException("检测到模型未返回 json!\n$raw"))
-        }
+        cleaned = fetchJsonWithRegex(cleaned)
 
-        return Result.success(cleaned)
+        try {
+            JsonParser.parseString(cleaned)
+            return Result.success(cleaned)
+        } catch (e: Exception) {
+            return Result.failure(IllegalStateException("JSON 解析失败: ${e.message}\n$raw"))
+        }
     }
 
     /**
