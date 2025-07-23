@@ -5,7 +5,7 @@ abstract class BaseLLMJsonExtractor<T> {
     /**
      * 用于处理大模型不听话, 返回了 markdown 代码块包装的 json 时的情况
      */
-    protected fun cleanJson(raw: String): String {
+    protected fun cleanJson(raw: String): Result<String> {
         var cleaned = raw.trim()
 
         // 移除 ```json 或 ``` 前缀和后缀
@@ -17,10 +17,10 @@ abstract class BaseLLMJsonExtractor<T> {
 
         // 确保是有效的JSON对象
         if (!cleaned.startsWith("{") || !cleaned.endsWith("}")) {
-            throw IllegalStateException("模型未返回 json!")
+            return Result.failure(IllegalStateException("检测到模型未返回 json!\n$raw"))
         }
 
-        return cleaned
+        return Result.success(cleaned)
     }
 
     /**

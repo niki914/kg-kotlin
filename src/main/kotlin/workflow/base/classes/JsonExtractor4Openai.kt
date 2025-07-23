@@ -7,6 +7,7 @@ import com.openai.client.okhttp.OpenAIOkHttpClient
 import com.openai.models.ChatModel
 import com.openai.models.chat.completions.ChatCompletionCreateParams
 import utils.logV
+import utils.logW
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
@@ -68,15 +69,28 @@ abstract class JsonExtractor4Openai<T>(
         val prompt = createPrompt(*input)
         logV("提示词:\n$prompt")
 
-        // 获取大模型回答, 假设为纯 JSON
-        val rawJson = getResponseFromLLM(prompt)
+        var lastError: Throwable = Throwable("重试失败次数过多，未能获取有效 JSON 响应。")
 
-        logV("大模型回答:\n$rawJson")
+        repeat(3) {
+            // 获取大模型回答, 假设为纯 JSON
+            val rawJson = getResponseFromLLM(prompt)
 
-        // 清理 JSON 字符串
-        val cleanedJson = cleanJson(rawJson)
+            logV("大模型回答:\n$rawJson")
 
-        return cleanedJson
+            // 清理 JSON 字符串
+            val cleanedJsonResult = cleanJson(rawJson)
+            val cleanResult = cleanedJsonResult.getOrNull()
+            if (!cleanResult.isNullOrBlank()) {
+                return cleanResult
+            } else {
+                cleanedJsonResult.exceptionOrNull()?.let {
+                    lastError = it
+                    logW(it.message ?: "未知错误")
+                }
+            }
+        }
+
+        throw lastError
     }
 
     protected inline fun <reified D> String.asJsonClass(): D =
