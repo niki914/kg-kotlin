@@ -1,11 +1,15 @@
 package beans
 
+import utils.Log
+import utils.castToLevel
+
 // 最顶层的配置类
 data class AppConfig(
     val api: ApiConfig?,
     val paths: PathsConfig?,
     val context: String?,
     val chunkSize: Long?,
+    val logLevel: Log.Level?,
     val neo4j: Neo4jConfig?,
     val classes: List<ClassDefinition>? = null
 ) {
@@ -15,6 +19,7 @@ data class AppConfig(
             val pathsMap = map["paths"] as? Map<*, *>
             val context = map["context"] as? String
             val chunkSize = map["chunk-size"] as? Long
+            val level = map["log-level"] as? String
             val neo4jMap = map["neo4j"] as? Map<*, *>
 
             val apiConfig = ApiConfig(
@@ -22,12 +27,14 @@ data class AppConfig(
                 baseUrl = apiMap?.get("base-url") as? String,
                 modelName = apiMap?.get("model-name") as? String
             )
+
             val pathsConfig = PathsConfig(
                 inputDir = pathsMap?.get("input-dir") as? String,
                 inputPath = pathsMap?.get("input-path") as? String,
                 errorDir = pathsMap?.get("error-dir") as? String,
                 outputDir = pathsMap?.get("output-dir") as? String
             )
+
             val neo4jConfig = Neo4jConfig(
                 url = neo4jMap?.get("url") as? String,
                 username = neo4jMap?.get("username") as? String,
@@ -46,6 +53,7 @@ data class AppConfig(
                 pathsConfig,
                 context,
                 chunkSize,
+                level?.castToLevel(),
                 neo4jConfig,
                 classes
             )

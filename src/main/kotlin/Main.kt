@@ -5,7 +5,7 @@ import utils.*
 import workflow.YamlParser
 import workflow.neo4j.Neo4jWriter
 
-const val EXAMPLE_YAML_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\example.yaml"
+const val CONFIG_YAML_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\config.yaml"
 
 val yamlParser = YamlParser()
 
@@ -16,7 +16,7 @@ fun logYamlConfig(path: String) {
 }
 
 fun readYamlConfigAsAppConfig(path: String): AppConfig {
-    val z = yamlParser.readAllAsMap(EXAMPLE_YAML_PATH)
+    val z = yamlParser.readAllAsMap(CONFIG_YAML_PATH)
     val c = AppConfig.fromMap(z)
     logD("读取配置为 AppConfig 实例")
     logD(prettyGson.toJson(c))
@@ -28,9 +28,18 @@ fun readYamlConfigAsAppConfig(path: String): AppConfig {
  */
 fun main(): Unit = runBlocking {
     logW("hello world")
-    val appConfig = readYamlConfigAsAppConfig(EXAMPLE_YAML_PATH)
+//    logYamlConfig(CONFIG_YAML_PATH)
+
+    val appConfig = readYamlConfigAsAppConfig(CONFIG_YAML_PATH)
+
+    appConfig.logLevel?.let {
+        Log.level = it
+        println("日志等级: ${it.name}")
+    }
+
     val neo4jConfig = appConfig.neo4j
     val pathsConfig = appConfig.paths
+
 //    throw Exception("你确定要运行?")
 
     // 创建 Main 实例, 负责协调数据处理流程
@@ -44,8 +53,8 @@ fun main(): Unit = runBlocking {
      */
     Neo4jWriter(
         neo4jConfig?.url ?: throw ConfigNotSetException("neo4j 参数"),
-        neo4jConfig.username ?: throw ConfigNotSetException("neo4j 参数"),
-        neo4jConfig.password ?: throw ConfigNotSetException("neo4j 参数")
+        neo4jConfig?.username ?: throw ConfigNotSetException("neo4j 参数"),
+        neo4jConfig?.password ?: throw ConfigNotSetException("neo4j 参数")
     ).use { neo4jWriter ->
         neo4jWriter.removeAll()
 

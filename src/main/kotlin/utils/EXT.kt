@@ -7,6 +7,18 @@ import java.io.File
 import java.nio.file.Paths
 import java.util.*
 
+fun String.castToLevel(): Log.Level {
+    val s = this.lowercase()
+    return when (s) {
+        "verbose", "v" -> Log.Level.VERBOSE
+        "debug", "d" -> Log.Level.DEBUG
+        "info", "i" -> Log.Level.INFO
+        "warning", "warn", "w" -> Log.Level.WARNING
+        "error", "e" -> Log.Level.ERROR
+        else -> Log.Level.NONE
+    }
+}
+
 val prettyGson: Gson by lazy {
     GsonBuilder().setPrettyPrinting().create()
 }
