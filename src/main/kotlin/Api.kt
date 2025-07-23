@@ -1,19 +1,19 @@
-import Api.Deepseek.DEEPSEEK_KEY
-import Api.Deepseek.GEMINI_KEYS
-import Api.Deepseek.ZUKE_KEY
-
 sealed class Api(
     val baseUrl: String,
     val modelName: String,
     val apiKeys: List<String>
 ) {
-
-
     constructor(
         baseUrl: String,
         modelName: String,
         apiKey: String
     ) : this(baseUrl, modelName, listOf(apiKey))
+
+    class Custom(
+        baseUrl: String,
+        modelName: String,
+        apiKey: String
+    ) : Api(baseUrl, modelName, apiKey)
 
     data object Deepseek : Api(
         "https://api.deepseek.com/",

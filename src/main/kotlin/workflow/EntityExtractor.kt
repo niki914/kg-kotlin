@@ -122,8 +122,13 @@ $data
         )
     }
 
-    fun extract(classes: List<ClassDefinition>, context: String, data: String): Entities {
+    fun extract(classes: List<ClassDefinition>, context: String?, data: String): Entities {
+        val c = if (context.isNullOrBlank()) {
+            null
+        } else {
+            context
+        }
         val classesStr = gson.toJson(classes)
-        return extract(context, classesStr, data)
+        return extract(c, classesStr, data)
     }
 }

@@ -7,7 +7,7 @@ import utils.logV
 import workflow.base.interfaces.IDataProcessor
 
 abstract class DataProcessor : IDataProcessor {
-    abstract val context: String
+    abstract val context: String?
     abstract val api: Api
 
     override val keyCounts: Int

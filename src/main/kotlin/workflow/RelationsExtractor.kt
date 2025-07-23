@@ -113,8 +113,13 @@ $data
         )
     }
 
-    fun extract(givenEntities: List<String>, context: String, data: String): Relations {
+    fun extract(givenEntities: List<String>, context: String?, data: String): Relations {
+        val c = if (context.isNullOrBlank()) {
+            null
+        } else {
+            context
+        }
         val givenEntitiesStr = gson.toJson(givenEntities)
-        return extract(givenEntitiesStr, context, data)
+        return extract(givenEntitiesStr, c, data)
     }
 }

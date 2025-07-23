@@ -1,3 +1,4 @@
+import beans.AppConfig
 import beans.ClassDefinition
 import beans.ExtractedData
 import beans.GroupedItems
@@ -7,22 +8,18 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import utils.*
 import workflow.DataProcessor
-import workflow.YamlParser
 import workflow.base.interfaces.ICleanDataParser
 import workflow.base.interfaces.IDataChucking
-import workflow.base.interfaces.IYamlParser
 import workflow.cleaning.CleanDataParser
 import workflow.cleaning.DataChucking
 
 /**
  * MainWorkFlow 类: 协调数据读取、分块、提取和合并的逻辑
  */
-class MainWorkFlow {
+class MainWorkFlow(private val appConfig: AppConfig) {
     // Yaml 解析器
-    private val yamlParser: IYamlParser = YamlParser("classes")
-    private val classDefinitions: List<ClassDefinition> by lazy {
-        yamlParser.readFromPath(EXAMPLE_YAML_PATH)
-    }
+    private val classDefinitions: List<ClassDefinition>
+        get() = appConfig.classes ?: emptyList()
 
     // 数据解析器, 负责从文件读取和分组清理后的数据
     private val cleanDataParser: ICleanDataParser = CleanDataParser()
@@ -32,8 +29,12 @@ class MainWorkFlow {
 
     // 数据处理器, 定义上下文和 API, 用于节点和关系提取
     private val dataProcessor = object : DataProcessor() {
-        override val context: String = CONTEXT
-        override val api: Api = API
+        override val context: String? = appConfig.context
+        override val api: Api = Api.Custom(
+            appConfig.api?.baseUrl ?: throw ConfigNotSetException("api 参数"),
+            appConfig.api.modelName ?: throw ConfigNotSetException("api 参数"),
+            appConfig.api.apiKey ?: throw ConfigNotSetException("api 参数"),
+        )
     }
 
     /**
@@ -86,7 +87,9 @@ class MainWorkFlow {
         // 捕获处理异常, 记录错误并保存分块到错误目录
         logD("记录为错误", "[${chunk.take(6)}...]")
         t.logE()
-        writeStringToFile(ERROR_DIR, "${chunk.hashCode()}.txt", chunk)
+        runCatching {
+            writeStringToFile(appConfig.paths?.outputDir!!, "${chunk.hashCode()}.txt", chunk)
+        }
         ExtractedData()
     }.also {
         // 打印分块处理完成日志
@@ -106,7 +109,7 @@ class MainWorkFlow {
      */
     fun readItemsFromFile(): List<GroupedItems> {
         // 从指定路径读取数据
-        val items = cleanDataParser.readFromPath(INPUT_PATH)
+        val items = cleanDataParser.readFromPath(appConfig.paths?.inputPath ?: "")
         // 打印读取的数据量
         logI("读取 item 数: ${items.size}")
         // 按文件名分组

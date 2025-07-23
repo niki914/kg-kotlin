@@ -32,6 +32,76 @@ fun Throwable.logE(simpleLog: Boolean = false, tag: String = "") {
     logE("\n" + log, tag)
 }
 
+fun formatMapToJsonLikeString(map: Map<String, Any?>, indentLevel: Int = 0): String {
+    val sb = StringBuilder()
+    val indent = "    ".repeat(indentLevel) // 4 spaces per indent level
+    val nextIndent = "    ".repeat(indentLevel + 1)
+
+    sb.append("{\n")
+
+    map.entries.forEachIndexed { index, (key, value) ->
+        sb.append(nextIndent)
+        sb.append("\"").append(key).append("\": ")
+
+        when (value) {
+            is Map<*, *> -> {
+                // Recursively format nested maps
+                sb.append(formatMapToJsonLikeString(value as Map<String, Any?>, indentLevel + 1))
+            }
+
+            is List<*> -> {
+                // Format lists
+                sb.append("[\n")
+                value.forEachIndexed { listIndex, listItem ->
+                    sb.append(nextIndent).append("    ") // Extra indent for list items
+                    when (listItem) {
+                        is String -> sb.append("\"").append(listItem).append("\"")
+                        is Number, is Boolean -> sb.append(listItem)
+                        null -> sb.append("null")
+                        else -> sb.append("\"").append(listItem.toString().replace("\"", "\\\""))
+                            .append("\"") // Handle other types as strings
+                    }
+                    if (listIndex < value.size - 1) {
+                        sb.append(",\n")
+                    } else {
+                        sb.append("\n")
+                    }
+                }
+                sb.append(nextIndent).append("]")
+            }
+
+            is String -> {
+                // Escape quotes in strings
+                sb.append("\"").append(value.replace("\"", "\\\"")).append("\"")
+            }
+
+            is Number, is Boolean -> {
+                // Numbers and booleans don't need quotes
+                sb.append(value)
+            }
+
+            null -> {
+                // Handle null values
+                sb.append("null")
+            }
+
+            else -> {
+                // Catch-all for other types, convert to string and quote
+                sb.append("\"").append(value.toString().replace("\"", "\\\"")).append("\"")
+            }
+        }
+
+        if (index < map.size - 1) {
+            sb.append(",\n")
+        } else {
+            sb.append("\n")
+        }
+    }
+
+    sb.append(indent).append("}")
+    return sb.toString()
+}
+
 fun readFileAsString(filePath: String): String {
     val file = File(filePath)
     if (!file.exists() || !file.isFile) {

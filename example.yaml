@@ -1,5 +1,27 @@
-#api:
-#  api-key
+# API 配置
+api:
+  api-key: sk-xxx # API 密钥
+  base-url: https://zuke.chat/v1/ # API BaseUrl
+  model-name: gemini-2.0-flash # 大模型代号
+
+# 文件路径配置
+paths:
+  input-dir: C:\Users\NIKI\Desktop\clean\ # 要遍历获取图谱的路径
+  input-path: C:\Users\NIKI\Desktop\clean\1.json
+  error-dir: C:\Users\NIKI\Desktop\clean\error # 错误输出路径
+  output-dir: C:\Users\NIKI\Desktop\clean\output # 输出路径
+
+# 应用上下文配置
+context: "论文《基于区块链的生物医学知识图谱协同构建技术研究》" # 获取的主题
+chunk-size: 1400 # 分块大小
+
+# Neo4j 数据库配置
+neo4j:
+  url: neo4j://10.24.2.101:7687/
+  username: neo4j
+  password: topview@624
+
+# 图谱抽取数据结构定义 - 类名 & 附加参数（不可多级）
 classes:
   论文:
     - 论文标题(str)
