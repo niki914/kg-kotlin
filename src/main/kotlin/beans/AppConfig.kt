@@ -10,6 +10,7 @@ data class AppConfig(
     val context: String?,
     val chunkSize: Long?,
     val logLevel: Log.Level?,
+    val clearOnStart: Int?,
     val neo4j: Neo4jConfig?,
     val classes: List<ClassDefinition>? = null
 ) {
@@ -20,6 +21,7 @@ data class AppConfig(
             val context = map["context"] as? String
             val chunkSize = map["chunk-size"] as? Long
             val level = map["log-level"] as? String
+            val clearOnStart = map["clear-on-start"] as? Int
             val neo4jMap = map["neo4j"] as? Map<*, *>
 
             val apiConfig = ApiConfig(
@@ -54,6 +56,7 @@ data class AppConfig(
                 context,
                 chunkSize,
                 level?.castToLevel(),
+                clearOnStart,
                 neo4jConfig,
                 classes
             )

@@ -1,11 +1,13 @@
 import beans.AppConfig
 import beans.GroupedItems
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import utils.*
 import workflow.YamlParser
 import workflow.neo4j.Neo4jWriter
+import java.io.File
 
-const val CONFIG_YAML_PATH = "C:\\Users\\NIKI\\Desktop\\clean\\config.yaml"
+lateinit var yamlConfigPath: String
 
 val yamlParser = YamlParser()
 
@@ -16,7 +18,7 @@ fun logYamlConfig(path: String) {
 }
 
 fun readYamlConfigAsAppConfig(path: String): AppConfig {
-    val z = yamlParser.readAllAsMap(CONFIG_YAML_PATH)
+    val z = yamlParser.readAllAsMap(yamlConfigPath)
     val c = AppConfig.fromMap(z)
     logD("读取配置为 AppConfig 实例")
     logD(prettyGson.toJson(c))
@@ -28,9 +30,19 @@ fun readYamlConfigAsAppConfig(path: String): AppConfig {
  */
 fun main(): Unit = runBlocking {
     logW("hello world")
-//    logYamlConfig(CONFIG_YAML_PATH)
 
-    val appConfig = readYamlConfigAsAppConfig(CONFIG_YAML_PATH)
+    try {
+        yamlConfigPath = File("config_path.txt").readText(Charsets.UTF_8)
+        if (!File(yamlConfigPath).exists()) {
+            throw Exception()
+        }
+        logD("yaml 路径为: $yamlConfigPath")
+        logYamlConfig(yamlConfigPath)
+    } catch (_: Exception) {
+        throw Exception("yaml 配置文件读取出错，请确保 jar 相对路径下正确配置 config_path.txt")
+    }
+
+    val appConfig = readYamlConfigAsAppConfig(yamlConfigPath)
 
     appConfig.logLevel?.let {
         Log.level = it
@@ -56,7 +68,11 @@ fun main(): Unit = runBlocking {
         neo4jConfig?.username ?: throw ConfigNotSetException("neo4j 参数"),
         neo4jConfig?.password ?: throw ConfigNotSetException("neo4j 参数")
     ).use { neo4jWriter ->
-        neo4jWriter.removeAll()
+        if (appConfig.clearOnStart == 1) {
+            logW("已设置 clear-on-start，5 秒后将清空 neo4j 数据")
+            delay(5000)
+            neo4jWriter.removeAll()
+        }
 
         try {
             // 读取输入文件并按文件名分组

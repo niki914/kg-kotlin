@@ -1,26 +1,27 @@
 # API 配置
 api:
-  api-key: sk-xxxxx # deepseek
-  base-url: https://api.deepseek.com/ # Deepseek API BaseUrl
-  model-name: deepseek-chat # 大模型代号
+  api-key: "sk-xxxx" # API 密钥
+  base-url: "https://zuke.chat/v1/" # API BaseUrl
+  model-name: "gemini-2.0-flash" # 大模型代号
 
 # 文件路径配置
 paths:
-  input-dir: C:\Users\NIKI\Desktop\clean\ # 要遍历获取图谱的路径
-  input-path: C:\Users\NIKI\Desktop\clean\1.json
-  error-dir: C:\Users\NIKI\Desktop\clean\error # 错误输出路径
-  output-dir: C:\Users\NIKI\Desktop\clean\output # 输出路径
+  input-dir: C:\Users\NIKI\Desktop\clean\ # 必填。要遍历获取图谱的路径
+  input-path: C:\Users\NIKI\Desktop\clean\1.json # 弃用
+  error-dir: C:\Users\NIKI\Desktop\clean\error # 弃用
+  output-dir: C:\Users\NIKI\Desktop\clean\output # 可空。输出路径
 
 # 应用上下文配置
 context: "论文《基于区块链的生物医学知识图谱协同构建技术研究》" # 获取的主题
 chunk-size: 1400 # 分块大小
 log-level: "D" # 日志等级
+clear-on-start: 1 # 是否在启动时清空 neo4j 数据。填 0 / 1
 
 # Neo4j 数据库配置
 neo4j:
-  url: neo4j://10.24.2.101:7687/
-  username: neo4j
-  password: topview@624
+  url: "neo4j://10.24.2.101:7687/" # 必填。当前配置为 4060 配置
+  username: "neo4j" # 必填。
+  password: "topview@624" # 必填。
 
 # 图谱抽取数据结构定义 - 类名 & 附加参数（不可多级）
 classes:
